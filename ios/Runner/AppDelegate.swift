@@ -9,37 +9,37 @@ import Firebase
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
       
+      GeneratedPluginRegistrant.register(with: self)
+      FirebaseApp.configure()
+      
       let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-      let channel = FlutterMethodChannel(name: "flutter.native/helper",binaryMessenger: controller.binaryMessenger)
+      let channel = FlutterMethodChannel(name: "flutter.native/helper", binaryMessenger: controller.binaryMessenger)
       
       channel.setMethodCallHandler({(call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         
-          guard call.method == "getLanguageCode" else {
-              result(FlutterMethodNotImplemented)
-              return
-          }
+          if(call.method == "getLanguageCode"){
           
-          let textStringText = call.arguments as String
-          let languageId = NaturalLanguage.naturalLanguage().languageIdentification()
+              let textStringText = call.arguments as! String
+              let languageId = NaturalLanguage.naturalLanguage().languageIdentification()
 
-          languageId.identifyLanguage(for: textStringText) { (languageCode, error) in
-            if let error = error {
-              print("Failed with error: \(error)")
-              result.success(error)
-              return
-            }
-            if let languageCode = languageCode, languageCode != "und" {
-              print("Identified Language: \(languageCode)")
-              result.success(languageCode)
-            } else {
-              print("No language was identified")
-              result.success("No language was identified")
-            }
+              languageId.identifyLanguage(for: textStringText) { (languageCode, error) in
+                if let error = error {
+                  print("Failed with error: \(error)")
+                  result(error)
+                  return
+                }
+                if let languageCode = languageCode, languageCode != "und" {
+                  print("Identified Language: \(languageCode)")
+                  result(languageCode)
+                } else {
+                  print("No language was identified")
+                  result("No language was identified")
+                }
+              }
           }
           
       })
       
-    GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
